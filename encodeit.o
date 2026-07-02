@@ -1,0 +1,387 @@
+/*
+ * Description:
+ *
+ *
+ * GENERAL Instruction Format
+ *
+ * -----------------------------------------------------------------
+ * | Instruciton    |   Opcode | ModR/M | Displacement | Immediate |
+ * | Prefixes       |          |        |              |           |
+ * -----------------------------------------------------------------
+ *
+ *  7  6  5   3  2   0
+ * --------------------
+ * | Mod | Reg* | R/M |
+ * --------------------
+ */ 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+/*
+ * definitions we need to support these functions.
+ *
+ * see Table 2-2 in SDM for register/MODRM encode usage
+ *
+ *
+ */
+#define PREFIX_16BIT   0x66
+#define BASE_MODRM     0xc0
+#define REG_SHIFT      0x3
+#define MODRM_SHIFT    0x6
+#define RM_SHIFT       0x0
+#define REG_MASK       0x7
+#define RM_MASK        0x7
+#define MOD_MASK       0x3
+
+// register defs based on MOD RM table
+#define REG_EAX        0x0
+#define REG_ECX        0x1
+#define REG_EDX        0x2
+#define REG_EBX        0x3
+#define REG_ESP        0x4
+#define REG_EBP        0x5
+#define REG_ESI        0x6
+#define REG_EDI        0x7
+
+#define REG_RAX 0
+#define REG_RCX 1
+#define REG_RDX 2
+#define REG_RBX 3
+#define REG_RSP 4
+#define REG_RBP 5
+#define REG_RSI 6
+#define REG_RDI 7
+// register defs based for x86_64, requires REX extension
+#define REG_R8        0x0
+#define REG_R9        0x1
+#define REG_R10       0x2
+#define REG_R11       0x3
+#define REG_R12       0x4
+#define REG_R13       0x5
+#define REG_R14       0x6
+#define REG_R15       0x7
+
+// byte offset
+#define BYTE1_OFF      0x1
+#define BYTE2_OFF      0x2
+#define BYTE3_OFF      0x3
+#define BYTE4_OFF      0x4
+
+// ISIZE (instruction size in bytes, for move example 2byte = 16bit)
+
+#define ISZ_1         0x1
+#define ISZ_2         0x2
+#define ISZ_4         0x4
+#define ISZ_8         0x8
+
+// x86_64 support defines
+#define REX_PREFIX    0x40
+#define REX_W         0x8
+#define REX_R         0x4
+#define REX_X         0x2
+#define REX_B         0x1
+
+// code generation defines
+
+#define MAX_INSTR_BYTES 10000
+#define MAX_DATA_BYTE  (10*1024)  // allocate 10K buffer for instructions
+/*
+ * Function: build_mov_register_to_register
+ * ---------------------------------------
+ * Builds a MOV instruction for moving data from one register to another.
+ *
+ * mov_size  : size of the operand (1, 2, 4, or 8 bytes)
+ * src_reg   : source register
+ * dest_reg  : destination register
+ * tgt_addr  : target memory to encode the instruction
+ *
+ * Returns: updated pointer to the next byte after the instruction
+ */
+static inline volatile char *build_mov_register_to_register(short mov_size, int src_reg, int dest_reg, volatile char *tgt_addr)
+{
+    // Ensure tgt_addr is not NULL
+    if (!tgt_addr)
+    {
+        fprintf(stderr, "ERROR: tgt_addr is NULL in build_mov_register_to_register\n");
+        return NULL;
+    }
+
+    // for 16-bit mode we need to treat it specially because it requires a prefix
+    if (mov_size == 2)
+    {
+        (*tgt_addr++) = PREFIX_16BIT;
+    }
+
+    if (mov_size == 8) {
+        (*(char *)tgt_addr) = (REX_PREFIX | REX_W);
+        tgt_addr += BYTE1_OFF;
+    }
+
+    switch (mov_size)
+    {
+        case 1:
+            (*(short *)tgt_addr) = ((BASE_MODRM) + (dest_reg << REG_SHIFT) + src_reg) << 8 | 0x8a;
+            tgt_addr += BYTE2_OFF;
+            break;
+
+        case 2: // can overload this case because same opcode, but already set prefix
+        case 4:
+        case 8:
+            (*(short *)tgt_addr) = ((BASE_MODRM) + (dest_reg << REG_SHIFT) + src_reg) << 8 | 0x8b;
+            tgt_addr += BYTE2_OFF;
+            break;
+
+        default:
+            fprintf(stderr, "ERROR: Incorrect size (%d) passed to register to register move\n", mov_size);
+            return NULL;
+    }
+
+    fprintf(stderr, "build_reg_to_register: tgt_addr = %p, instr = %02x %02x %02x\n", tgt_addr, *(tgt_addr - 3), *(tgt_addr - 2), *(tgt_addr - 1));
+    return tgt_addr;
+}
+
+/*
+ * Function: build_imm_to_register
+ * -------------------------------
+ * Builds a MOV instruction to move an immediate value into a register.
+ *
+ * imm_size  : size of the immediate value (1, 2, 4, or 8 bytes)
+ * reg       : destination register
+ * immediate : the immediate value
+ * tgt_addr  : memory buffer to store the instruction
+ *
+ * Returns: updated pointer to the next byte after the instruction
+ */
+static inline volatile char *build_imm_to_register(short imm_size, int reg, uintptr_t immediate, volatile char *tgt_addr) {
+   // Prefix for 16-bit
+    if (imm_size == 2) {
+        (*tgt_addr++) = PREFIX_16BIT;
+    }
+     // Prefix for 64-bit (REX.W)
+    if (imm_size == 8) {
+	   *tgt_addr = (REX_PREFIX|REX_W);
+	    tgt_addr+=BYTE1_OFF;	
+	}
+ // Opcode for MOV immediate to register: 0xB8 + register
+    switch (imm_size) {
+        case 1:
+            (*tgt_addr++) = 0xb0 + reg;
+            (*tgt_addr++) = (char)immediate;
+            break;
+        case 2:
+            (*tgt_addr++) = 0xb8 + reg;
+            (*(short *)tgt_addr) = (short)immediate;
+            tgt_addr += imm_size;
+            break;
+        case 4:
+            (*tgt_addr++) = 0xb8 + reg;
+            (*(int *)tgt_addr) = (int)immediate;
+            tgt_addr += imm_size;
+            break;
+        case 8:
+            // Add REX prefix for 64-bit
+            *tgt_addr++ = REX_PREFIX | REX_W;
+            *tgt_addr++ = 0xb8 + reg;
+
+            // SAFELY cast immediate to long long and copy byte by byte
+            {
+                unsigned long long imm64 = (unsigned long long)(uintptr_t)immediate;  // zero-extend
+                char *imm_ptr = (char *)&imm64;
+                int i;
+                for (i = 0; i < 8; i++) {
+                    *tgt_addr++ = imm_ptr[i];
+                }
+            }
+            break;
+
+
+            fprintf(stderr, "ERROR: Incorrect size (%d) passed to immediate to register move\n", imm_size);
+            return (NULL);
+    }
+    fprintf(stderr, "build_imm_to_register: tgt_addr = %p, instr = %02x %02x %02x %02x\n", tgt_addr, *(tgt_addr - 4), *(tgt_addr - 3), *(tgt_addr - 2), *(tgt_addr - 1));
+    return tgt_addr;
+}
+
+/*
+ * Function: build_reg_to_memory
+ * -----------------------------
+ * Encodes a MOV instruction from register to memory with optional displacement.
+ *
+ * mov_size     : size of the operand
+ * src_reg      : source register
+ * dest_reg     : memory base register
+ * displacement : optional offset
+ * tgt_addr     : memory location to write encoded instruction
+ *
+ * Returns: updated pointer to next free byte
+ */
+static inline volatile char *build_reg_to_memory(short mov_size, int src_reg, int dest_reg, int displacement, volatile char *tgt_addr) {
+    // Handle prefix for 16-bit mode
+    if (mov_size == 2) {
+        (*tgt_addr++) = PREFIX_16BIT;
+    }
+    // Handle 64-bit (REX prefix)
+    if (mov_size == 8) {
+        (*(char *)tgt_addr) = (REX_PREFIX | REX_W);
+        tgt_addr += BYTE1_OFF;
+    }
+    // Opcode selection
+    switch (mov_size) {
+        case 1:
+            (*tgt_addr++) = 0x88; // MOV r/m8, r8
+            break;
+        case 2:
+        case 4:
+            (*tgt_addr++) = 0x89; // MOV r/m16, r16 or MOV r/m32, r32
+            break;
+        case 8:
+            (*tgt_addr++) = 0x89; // MOV r/m64, r64
+            break;
+        default:
+            fprintf(stderr, "ERROR: Incorrect size (%d) passed to register to memory move\n", mov_size);
+            return NULL;
+    }
+
+    // Handle the ModR/M byte and displacement
+    if (displacement == 0) {
+        (*tgt_addr++) = (0x0 << MODRM_SHIFT) | (src_reg << REG_SHIFT) | dest_reg; 
+    } else if (displacement >= 1 && displacement <= 0x7F) {
+        (*tgt_addr++) = (0x1 << MODRM_SHIFT) | (src_reg << REG_SHIFT) | dest_reg; 
+        (*tgt_addr++) = (char)displacement;
+    } else {
+        (*tgt_addr++) = (0x2 << MODRM_SHIFT) | (src_reg << REG_SHIFT) | dest_reg; 
+        (*(int *)tgt_addr) = displacement;
+        tgt_addr += 4;
+    }
+
+    fprintf(stderr, "build_reg_to_memory: tgt_addr = %p, instr = %02x %02x %02x %02x\n", tgt_addr, *(tgt_addr - 4), *(tgt_addr - 3), *(tgt_addr - 2), *(tgt_addr - 1));
+    return tgt_addr;
+}
+
+/*
+ * Function: build_memory_to_reg
+ * -----------------------------
+ * Encodes a MOV instruction from memory to register with optional displacement.
+ *
+ * mov_size     : size of the operand
+ * dest_reg     : destination register
+ * src_reg      : base register for memory
+ * displacement : offset from base
+ * tgt_addr     : output memory location
+ *
+ * Returns: pointer to the next instruction byte
+ */
+static inline volatile char *build_memory_to_reg(short mov_size, int dest_reg, int src_reg, int displacement, volatile char *tgt_addr) {
+    // Prefix for 16-bit mode
+    if (mov_size == 2) {
+        (*tgt_addr++) = PREFIX_16BIT;
+    }
+    // Prefix for 64-bit mode
+    if (mov_size == 8) {
+        (*(char *)tgt_addr) = (REX_PREFIX | REX_W);
+        tgt_addr += BYTE1_OFF;
+    }
+    
+    // Select opcode
+    switch (mov_size) {
+        case 1:
+            (*tgt_addr++) = 0x8A; // MOV r8, r/m8
+            break;
+        case 2:
+        case 4:
+        case 8:
+            (*tgt_addr++) = 0x8B; // MOV r16, r/m16 or MOV r32, r/m32 or MOV r64, r/m64
+            break;
+        default:
+            fprintf(stderr, "ERROR: Incorrect size (%d) passed to memory to register move\n", mov_size);
+            return NULL;
+    }
+
+    // Handle the ModR/M byte and displacement
+    if (displacement == 0) {
+        (*tgt_addr++) = (0x0 << MODRM_SHIFT) | (dest_reg << REG_SHIFT) | src_reg;
+    } else if (displacement >= 1 && displacement <= 0x7F) {
+        (*tgt_addr++) = (0x1 << MODRM_SHIFT) | (dest_reg << REG_SHIFT) | src_reg;
+        (*tgt_addr++) = (char)displacement;
+    } else {
+        (*tgt_addr++) = (0x2 << MODRM_SHIFT) | (dest_reg << REG_SHIFT) | src_reg;
+        (*(int *)tgt_addr) = displacement;
+        tgt_addr += 4;
+    }
+
+    fprintf(stderr, "build_memory_to_reg: tgt_addr = %p, instr = %02x %02x %02x %02x\n", tgt_addr, *(tgt_addr - 4), *(tgt_addr - 3), *(tgt_addr - 2), *(tgt_addr - 1));
+    return tgt_addr;
+}
+
+/*
+ * Function: build_push_reg
+ *
+ * Description:
+ *
+ * builds push register
+ *
+ * Inputs: 
+ *
+ *  int reg_index                :  index of register
+ *  int x86_64f                  :  flag to indicate if we need to extend to rex format
+ *  volatile char *tgt_addr      :  starting memory address of where to store instruction
+ *
+ * Output: 
+ *
+ *  returns adjusted address after encoding instruction
+ *
+ */
+
+
+static inline volatile char *build_push_reg(int reg_index, int x86_64f, volatile char *tgt_addr)
+{
+
+	if (x86_64f) {
+		// this is a quick hack for REX_B prefix
+
+		(*(char *) tgt_addr)=(REX_PREFIX | REX_B);
+		tgt_addr += BYTE1_OFF;
+	}
+
+	(*(char *) tgt_addr) = 0x50+reg_index;;
+	tgt_addr += BYTE1_OFF;
+			
+        return(tgt_addr);
+}
+
+/*
+ * Function: build_pop_reg
+ *
+ * Description:
+ *
+ * builds pop register
+ *
+ * Inputs: 
+ *
+ *  int reg_index                :  index of register
+ *  int x86_64f                  :  flag to indicate if we need to exted to rex format
+ *  volatile char *tgt_addr      :  starting memory address of where to store instruction
+ *
+ * Output: 
+ *
+ *  returns adjusted address after encoding instruction
+ *
+ */
+
+
+static inline volatile char *build_pop_reg(int reg_index, int x86_64f, volatile char *tgt_addr)
+{
+
+	if (x86_64f) {
+		// this is a quick hack for REX_B prefix
+
+		(*(char *) tgt_addr)=(REX_PREFIX | REX_B);
+		tgt_addr += BYTE1_OFF;
+	}
+
+	(*(char *) tgt_addr) = 0x58+reg_index;;
+	tgt_addr += BYTE1_OFF;
+			
+        return(tgt_addr);
+}
