@@ -1,0 +1,135 @@
+ Assigned child process T1106981 to CPU_0
+Thread 0...
+ Instruction MOV Register to Memory :Inst_size=1	 Src_reg =5	 mem_reg=0	Displacement=5408 	
+Thread no 0 	 next ptr is now 0x7ffff7fab01d
+Thread 0...
+ Instruction MOV IMM to reg:Instruction_size=4	 src_reg=201	 dest_reg=6
+Thread no 0 	 next ptr is now 0x7ffff7fab023
+Thread 0...:Build instruction SFENCE 		Thread no 0 	 next ptr is now 0x7ffff7fab026
+Thread 0...
+ Instruction MOV Memory to Register :Inst_size=2	 mem_reg =0	 dest_reg=6	Displacement=5632 	
+Thread no 0 	 next ptr is now 0x7ffff7fab02d
+Thread 0...
+ Instruction MOV REG to reg:Instruction_size=2	 src_reg=5	 dest_reg=3
+Thread no 0 	 next ptr is now 0x7ffff7fab030
+Thread 0...
+ Instruction MOV Register to Memory :Inst_size=2	 Src_reg =4	 mem_reg=0	Displacement=1060 	
+Thread no 0 	 next ptr is now 0x7ffff7fab037
+Thread 0...
+ Instruction MOV Register to Memory :Inst_size=2	 Src_reg =2	 mem_reg=0	Displacement=6232 	
+Thread no 0 	 next ptr is now 0x7ffff7fab03e
+Thread 0...:Build instruction SFENCE 		Thread no 0 	 next ptr is now 0x7ffff7fab041
+Thread 0...
+ Instruction XADD :Inst_size=1	 scr_reg =6	 dest_reg=3		
+Thread no 0 	 next ptr is now 0x7ffff7fab043
+Thread 0...
+ Instruction XADD :Inst_size=4	 scr_reg =5	 dest_reg=1		
+Thread no 0 	 next ptr is now 0x7ffff7fab045
+ Assigned child process T1106982 to CPU_1
+Thread 1...
+ Instruction MOV Register to Memory :Inst_size=1	 Src_reg =5	 mem_reg=0	Displacement=5408 	
+Thread no 1 	 next ptr is now 0x7ffff7fad72d
+Thread 1...
+ Instruction MOV IMM to reg:Instruction_size=4	 src_reg=201	 dest_reg=6
+Thread no 1 	 next ptr is now 0x7ffff7fad733
+Thread 1...:Build instruction SFENCE 		Thread no 1 	 next ptr is now 0x7ffff7fad736
+Thread 1...
+ Instruction MOV Memory to Register :Inst_size=2	 mem_reg =0	 dest_reg=6	Displacement=5632 	
+Thread no 1 	 next ptr is now 0x7ffff7fad73d
+Thread 1...
+ Instruction MOV REG to reg:Instruction_size=2	 src_reg=5	 dest_reg=3
+Thread no 1 	 next ptr is now 0x7ffff7fad740
+Thread 1...
+ Instruction MOV Register to Memory :Inst_size=2	 Src_reg =4	 mem_reg=0	Displacement=1060 	
+Thread no 1 	 next ptr is now 0x7ffff7fad747
+Thread 1...
+ Instruction MOV Register to Memory :Inst_size=2	 Src_reg =2	 mem_reg=0	Displacement=6232 	
+Thread no 1 	 next ptr is now 0x7ffff7fad74e
+Thread 1...:Build instruction SFENCE 		Thread no 1 	 next ptr is now 0x7ffff7fad751
+Thread 1...
+ Instruction XADD :Inst_size=1	 scr_reg =6	 dest_reg=3		
+Thread no 1 	 next ptr is now 0x7ffff7fad753
+Thread 1...
+ Instruction XADD :Inst_size=4	 scr_reg =5	 dest_reg=1		
+Thread no 1 	 next ptr is now 0x7ffff7fad755
+ Assigned child process T1106983 to CPU_2
+Thread 2...
+ Instruction MOV Register to Memory :Inst_size=1	 Src_reg =5	 mem_reg=0	Displacement=5408 	
+Thread no 2 	 next ptr is now 0x7ffff7fafe3d
+Thread 2...
+ Instruction MOV IMM to reg:Instruction_size=4	 src_reg=201	 dest_reg=6
+Thread no 2 	 next ptr is now 0x7ffff7fafe43
+Thread 2...:Build instruction SFENCE 		Thread no 2 	 next ptr is now 0x7ffff7fafe46
+Thread 2...
+ Instruction MOV Memory to Register :Inst_size=2	 mem_reg =0	 dest_reg=6	Displacement=5632 	
+Thread no 2 	 next ptr is now 0x7ffff7fafe4d
+Thread 2...
+ Instruction MOV REG to reg:Instruction_size=2	 src_reg=5	 dest_reg=3
+Thread no 2 	 next ptr is now 0x7ffff7fafe50
+Thread 2...
+ Instruction MOV Register to Memory :Inst_size=2	 Src_reg =4	 mem_reg=0	Displacement=1060 	
+Thread no 2 	 next ptr is now 0x7ffff7fafe57
+Thread 2...
+ Instruction MOV Register to Memory :Inst_size=2	 Src_reg =2	 mem_reg=0	Displacement=6232 	
+Thread no 2 	 next ptr is now 0x7ffff7fafe5e
+Thread 2...:Build instruction SFENCE 		Thread no 2 	 next ptr is now 0x7ffff7fafe61
+Thread 2...
+ Instruction XADD :Inst_size=1	 scr_reg =6	 dest_reg=3		
+Thread no 2 	 next ptr is now 0x7ffff7fafe63
+Thread 2...
+ Instruction XADD :Inst_size=4	 scr_reg =5	 dest_reg=1		
+Thread no 2 	 next ptr is now 0x7ffff7fafe65
+ Assigned child process T1106984 to CPU_3
+Thread 3...
+ Instruction MOV Register to Memory :Inst_size=1	 Src_reg =5	 mem_reg=0	Displacement=5408 	
+Thread no 3 	 next ptr is now 0x7ffff7fb254d
+Thread 3...
+ Instruction MOV IMM to reg:Instruction_size=4	 src_reg=201	 dest_reg=6
+Thread no 3 	 next ptr is now 0x7ffff7fb2553
+Thread 3...:Build instruction SFENCE 		Thread no 3 	 next ptr is now 0x7ffff7fb2556
+Thread 3...
+ Instruction MOV Memory to Register :Inst_size=2	 mem_reg =0	 dest_reg=6	Displacement=5632 	
+Thread no 3 	 next ptr is now 0x7ffff7fb255d
+Thread 3...
+ Instruction MOV REG to reg:Instruction_size=2	 src_reg=5	 dest_reg=3
+Thread no 3 	 next ptr is now 0x7ffff7fb2560
+Thread 3...
+ Instruction MOV Register to Memory :Inst_size=2	 Src_reg =4	 mem_reg=0	Displacement=1060 	
+Thread no 3 	 next ptr is now 0x7ffff7fb2567
+Thread 3...
+ Instruction MOV Register to Memory :Inst_size=2	 Src_reg =2	 mem_reg=0	Displacement=6232 	
+Thread no 3 	 next ptr is now 0x7ffff7fb256e
+Thread 3...:Build instruction SFENCE 		Thread no 3 	 next ptr is now 0x7ffff7fb2571
+Thread 3...
+ Instruction XADD :Inst_size=1	 scr_reg =6	 dest_reg=3		
+Thread no 3 	 next ptr is now 0x7ffff7fb2573
+Thread 3...
+ Instruction XADD :Inst_size=4	 scr_reg =5	 dest_reg=1		
+Thread no 3 	 next ptr is now 0x7ffff7fb2575
+ Assigned child process T1106985 to CPU_4
+Thread 4...
+ Instruction MOV Register to Memory :Inst_size=1	 Src_reg =5	 mem_reg=0	Displacement=5408 	
+Thread no 4 	 next ptr is now 0x7ffff7fb4c5d
+Thread 4...
+ Instruction MOV IMM to reg:Instruction_size=4	 src_reg=201	 dest_reg=6
+Thread no 4 	 next ptr is now 0x7ffff7fb4c63
+Thread 4...:Build instruction SFENCE 		Thread no 4 	 next ptr is now 0x7ffff7fb4c66
+Thread 4...
+ Instruction MOV Memory to Register :Inst_size=2	 mem_reg =0	 dest_reg=6	Displacement=5632 	
+Thread no 4 	 next ptr is now 0x7ffff7fb4c6d
+Thread 4...
+ Instruction MOV REG to reg:Instruction_size=2	 src_reg=5	 dest_reg=3
+Thread no 4 	 next ptr is now 0x7ffff7fb4c70
+Thread 4...
+ Instruction MOV Register to Memory :Inst_size=2	 Src_reg =4	 mem_reg=0	Displacement=1060 	
+Thread no 4 	 next ptr is now 0x7ffff7fb4c77
+Thread 4...
+ Instruction MOV Register to Memory :Inst_size=2	 Src_reg =2	 mem_reg=0	Displacement=6232 	
+Thread no 4 	 next ptr is now 0x7ffff7fb4c7e
+Thread 4...:Build instruction SFENCE 		Thread no 4 	 next ptr is now 0x7ffff7fb4c81
+Thread 4...
+ Instruction XADD :Inst_size=1	 scr_reg =6	 dest_reg=3		
+Thread no 4 	 next ptr is now 0x7ffff7fb4c83
+Thread 4...
+ Instruction XADD :Inst_size=4	 scr_reg =5	 dest_reg=1		
+Thread no 4 	 next ptr is now 0x7ffff7fb4c85
